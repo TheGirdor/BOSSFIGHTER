@@ -18,7 +18,7 @@ void Col(Color c){
 int keyp,delka=0,i;
 int hp=100,block=0,energy=100,dmg=0,wep=0;
 int hpb=500,dmgb=15,blockb=15;
-int rdmg=dmg-20,rest=0;
+int rdmg=dmg-20,rest=0,dps=0,dpsb=0,energyloss=0,impo=0,blockr=0;
  
 char zn;    
       
@@ -26,7 +26,7 @@ char zn;
      {    
           SetConsoleTitle("Instructions");
           system("cls");
-          cout << "The goal of this game is to kill a boss. Very simple, isnt it \? \nSimple instructions : \n [1] Attack = deals dmg to the boss, depends on RNG \n [2] Cover  = blocks part of the dmg from the boss, depends on RNG \n [3] Rest   = restores energy, next attack dmg is doubled after resting\n\nPress a key to return to menu";
+          cout << "The goal of this game is to kill a boss. Very simple, isnt it \? \nSimple instructions : \n [1] Attack = deals dmg to the boss, depends on RNG \n [2] Cover  = blocks all dmg thats dealt by the boss this turn\n [3] Rest   = restores energy, next attack dmg is doubled after resting\n\nPress a key to return to menu";
           keyp=getch();       
      }
       void about()
@@ -61,14 +61,14 @@ char zn;
       
            
       SetConsoleTitle("BOSSFIGHTER");     
-      char text1[100]="Welcome to my lair adventurer!\nUnfortunatly,",text2[100]="YOU FACE ME! BIG GLURM!!!",text3[100]="\nFight me, or run like coward !";         
+      char text1[100]="Welcome to my lair adventurer!\nUnfortunately,",text2[100]="YOU FACE ME! BIG GLURM!!!",text3[100]="\nFight me or run like coward !";         
       system("cls");
       delka=strlen(text1);
       for (i = 0; i <=delka; i++)
       {
           cout << text1[i];
           Sleep(100);      
-          }
+          }      
       delka=strlen(text2);
       Col(RED);
       for (i = 0; i <=delka; i++)
@@ -77,14 +77,15 @@ char zn;
           Sleep(100);      
           }
       Col(WHITE);      
-      Sleep(1500);
+      Sleep(500);
       delka=strlen(text3);
       for (i = 0; i <=delka; i++)
       {
           cout << text3[i];
           Sleep(100);
           }
-      Sleep(1000);      
+      cout << "\nPress a key to continue";
+      system("PAUSE > NUL");     
       while((keyp!='1') || (keyp!='2'))      
       {            
             system("cls");
@@ -125,7 +126,12 @@ char zn;
             if (keyp=='2') {dmg=dmg+35;block=block+ 5;energy=energy+20;wep=2;break;}
             if (keyp=='3') {dmg=dmg+15;block=block+30;energy=energy-20;hp=hp+80;wep=3;break;}
             }  
-      
+            if(wep==1)
+            energyloss=10;
+            if(wep==2)
+            energyloss=15;
+            if(wep==3)
+            energyloss=5;      
             
       while((keyp!='1') || (keyp!='2') || (keyp!='3'))      
       {            
@@ -155,49 +161,116 @@ char zn;
             if (keyp=='1') {dmg=dmg+ 5;block=block-10;energy=energy+20;hp=hp+50;break;}
             if (keyp=='2') {dmg=dmg+20;block=block+5;energy=energy+10;hp=hp-30;break;}
             if (keyp=='3') {dmg=dmg+15;block=block-20;energy=energy-5 ;hp=hp+80;break;}
-            }                 
+            }
+            blockr=block;                 
       
       while (hpb>0)
       {
             system("cls");
             cout << "Your curent stats:"; Col(RED); cout << " Health: " << hp; Col(DARKTEAL); cout << " Damage:20-" << dmg; Col(BLUE); cout << " Block: " << block << "\%"; Col(YELLOW); cout << " Energy: " << energy; Col(WHITE);
-            cout << "\nBoss curent stats:"; Col(RED); cout << " Health: " << hpb; Col(DARKTEAL); cout << " Damage: 1-" << dmgb; Col(BLUE); cout << " Block: " << blockb << "\%"; Col(YELLOW); cout << " Energy: unlimited "; Col(WHITE);
+            cout << "\nBoss curent stats:"; Col(RED); cout << " Health: " << hpb; Col(DARKTEAL); cout << " Damage: 5-" << dmgb; Col(BLUE); cout << " Block: " << blockb << "\%"; Col(YELLOW); cout << " Energy: unlimited "; Col(WHITE);
             cout << "\n\n[1] Attack\n\n[2] Cover\n\n[3] Rest\n";
             keyp=getch();
-            if (keyp=='1') //{hpb=hpb-dmg;hp=hp-dmgb;}
+            if (keyp=='1')
             {
-                           if(rand()%100<=blockb)                           
-                           cout <<"\n\n\nYour attack missed.";
+                  if(energy>0)
+                  {
+                           energy=energy-energyloss;
+                           dps=rand()%rdmg+20;
+                           if(rand()%100<=blockb)
+                           {                           
+                                  cout <<"\n\n\nYour attack missed.";
+                                  Beep(200,400);
+                                  Sleep(50);
+                                  }                           
                            else
-                           hpb=hpb-(rand()%rdmg+20);                                                  
+                           {                                  
+                               if(rest==1)
+                               {
+                                   dps=dps*2;
+                                   rest=0;
+                                   }                        
+                               cout << "\n\n\nYour attack did ";
+                               Col(RED);
+                               cout << dps;
+                               Col(WHITE);
+                               cout << " points of damage";                               
+                               hpb=hpb-dps;
+                               if (dps>dmg)
+                                {
+                                    Col(RED);
+                                    cout << "\nIT'S A CRITICAL HIT!";
+                                    Col(WHITE);
+                                    }
+                               Beep(400,800);
+                               Sleep(50);                                                  
+                               }
                            }
-            if (keyp=='2') {dmg=dmg+20;block=block+50;energy=energy+10;hp=hp-30;break;}
-            if (keyp=='3') {dmg=dmg+15;block=block-20;energy=energy-5 ;hp=hp+80;break;}
-                             
-            if(rand()%100<=block) 
-            {                          
-                 cout <<"\n\n\nBoss attack missed.";
-                 Sleep(1000);
-                 }
+                           else
+                           {
+                               cout << "\n\nYou can't attack with this low energy";
+                               impo=1;
+                               }
+                           }
+                  
+            if (keyp=='2') {if(energy>0) {block=block+50;energy=energy-5;}else{cout << "\n\nYou can't block with this low energy";impo=1;}}
+            if (keyp=='3') {if(energy<50){rest=1; cout << "You gained";Col(YELLOW); cout << " 50 "; Col(WHITE); cout << "energy points.";energy=energy+50;} else{cout << "\n\nYou may rest only under 50 energy";impo=1;}}
+            if(impo==0)
+            {
+                        dpsb=rand()%dmgb+5;                
+                        if(rand()%100<=block) 
+                        {                          
+                                cout <<"\nBoss attack missed.";
+                                Beep(200,400);
+                                Sleep(50);
+                                cout <<"\nPress a key to continue.";
+                                system("PAUSE > NUL");
+                                }
+                        else
+                        {
+                            if (rand()%100==1)
+                            dpsb=dpsb*2;
+                            else
+                            {
+                                hp=hp-dpsb;                            
+                                cout << "\nBoss's attack did ";                            
+                                Col(RED);
+                                cout << dpsb;
+                                Col(WHITE);
+                                cout << " points of damage"; 
+                                Beep(400,800);
+                                Sleep(50);
+                                if (dpsb>dmgb)
+                                {
+                                    Col(RED);
+                                    cout << "\nIT'S A CRITICAL HIT!";
+                                    Col(WHITE);
+                                    }
+                                cout <<"\nPress a key to continue.";               
+                                system("PAUSE > NUL");
+                                }                
+                            }
+                        if (hp<=0)
+                        break;
+                        if (hpb<0)
+                        {
+                           system("cls");
+                           cout << "YOU WIN!!!";                           
+                           Beep(700,400);Sleep(10);Beep(600,400);Sleep(10);Beep(600,400);Sleep(10);Beep(700,400);
+                           system("PAUSE > NUL");
+                           return 0;  
+                           }      
+                        }            
             else
-            {
-                hp=hp-(rand()%dmgb);
-                Sleep(1000);
-                }
-            if (hp<0)
-            break;
-            if (hpb<0)
-            {
-               system("cls");
-               cout << "YOU WIN!!!";
-               system("PAUSE > NUL");
-               return 0; 
-               }    
+            system("PAUSE > NUL");           
+            block=blockr;
+            impo=0;
+      }
             
-            }
     end:
     system("cls");
     cout<<"YOU ARE LOSER!\nGame over";
+    Beep(700,400);Sleep(10);Beep(600,400);Sleep(10);Beep(500,400);Sleep(10);Beep(400,400);Sleep(10);Beep(300,400);Sleep(10);Beep(200,400);Sleep(10);Beep(100,400);
     system("PAUSE > NUL");
     return 0;    
 
